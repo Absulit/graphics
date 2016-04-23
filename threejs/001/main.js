@@ -11,6 +11,9 @@ var scene,
 
 var groundMirror;
 
+            var controls;
+            var effect;
+
 var resizeViewport = function(){
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -38,6 +41,13 @@ var toggleStereo = function(){
 }
 
 function init() {
+    if ( WEBVR.isLatestAvailable() === false ) {
+
+        document.body.appendChild( WEBVR.getMessage() );
+
+    }
+
+
     renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -58,6 +68,17 @@ function init() {
     /*
         My code
     */
+            controls = new THREE.VRControls( camera );
+            effect = new THREE.VREffect( renderer );
+
+            if ( WEBVR.isAvailable() === true ) {
+
+                document.body.appendChild( WEBVR.getButton( effect ) );
+
+            }
+
+
+
     ABSULIT.skysphere.init('office.jpg');
 
     var path = "textures/cube/SwedishRoyalCastle/";
@@ -91,6 +112,7 @@ function init() {
 
 
     cube = new THREE.Mesh( geometry, cubeMaterial );
+    cube.position.z = 5;
     scene.add( cube );
 
     light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
@@ -141,7 +163,7 @@ function update() {
     cube.rotation.y += (.01*60) * delta;
 
     var scale = 1 + Math.abs(Math.sin(cube.rotation.y));
-    console.log(scale);
+    //console.log(scale);
     cube.scale.set(scale,scale,scale);
 
     groundMirror.render();
@@ -150,11 +172,15 @@ function update() {
         - My code ends
     */
 
-    if(stereoEnabled){
+    /*if(stereoEnabled){
         effect.render(scene, camera);
     }else{
         renderer.render(scene, camera);
-    }
+    }*/
+
+                controls.update();
+
+                effect.render( scene, camera );
 }
 
 function fullscreen() {
